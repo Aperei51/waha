@@ -1,0 +1,21 @@
+# Configuração da Netlify para o site de Coleta Pós-Vendas ABRAJEEP.
+# A "base" assume que este diretório (abrajeep-coleta-pos-vendas) é a raiz do site.
+# Se você fizer deploy de dentro desta pasta, mantenha como está.
+
+[build]
+  # Site estático: nada para compilar.
+  publish = "public"
+  functions = "netlify/functions"
+
+# Redirect amigável: o navegador chama /api/submit (mesma origem, sem CORS).
+[[redirects]]
+  from = "/api/submit"
+  to = "/.netlify/functions/submit"
+  status = 200
+  force = true
+
+# SPA-friendly: garante que a raiz sirva o index.
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200

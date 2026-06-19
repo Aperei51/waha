@@ -1,0 +1,10 @@
+# Netlify
+.netlify/
+node_modules/
+
+# clasp (Apps Script) — não versionar credenciais/ligação local
+apps-script/.clasp.json
+apps-script/.clasprc.json
+
+# Sistema
+.DS_Store

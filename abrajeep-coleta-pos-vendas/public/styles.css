@@ -1,0 +1,272 @@
+/* ABRAJEEP — Coleta de Rentabilidade do Pós-Vendas
+   Identidade: verde institucional #004437, branco, apoio cinza claro. Fonte Arial. */
+
+:root {
+  --verde: #004437;
+  --verde-claro: #0a5a4a;
+  --verde-foco: #2f7d6c;
+  --branco: #ffffff;
+  --cinza-fundo: #f4f6f5;
+  --cinza-borda: #d4dad8;
+  --cinza-texto: #5a6360;
+  --texto: #1c2522;
+  --erro: #b00020;
+  --raio: 8px;
+  --sombra: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  color: var(--texto);
+  background: var(--cinza-fundo);
+  line-height: 1.5;
+}
+
+/* ───────── Cabeçalho ───────── */
+.cabecalho {
+  background: var(--verde);
+  color: var(--branco);
+}
+.cabecalho__interno {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cabecalho__logo {
+  background: var(--branco);
+  border-radius: var(--raio);
+  padding: 8px 12px;
+  display: inline-flex;
+}
+.cabecalho__logo img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+.cabecalho__titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: bold;
+}
+
+/* ───────── Conteúdo ───────── */
+.conteudo {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+.intro {
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-left: 4px solid var(--verde);
+  border-radius: var(--raio);
+  padding: 14px 16px;
+  margin: 0 0 20px;
+  font-size: 0.95rem;
+}
+.obrig-marca { color: var(--erro); font-weight: bold; }
+
+/* ───────── Cartões / Acordeão ───────── */
+.cartao {
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.cartao__titulo {
+  margin: 0;
+  padding: 16px 18px;
+  font-size: 1.05rem;
+  color: var(--verde);
+}
+
+.secao__cabecalho {
+  margin: 0;
+}
+.secao__botao {
+  width: 100%;
+  text-align: left;
+  background: var(--branco);
+  border: none;
+  border-bottom: 1px solid var(--cinza-borda);
+  padding: 16px 18px;
+  font: inherit;
+  font-weight: bold;
+  font-size: 1.02rem;
+  color: var(--verde);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.secao__botao:hover { background: var(--cinza-fundo); }
+.secao__seta {
+  border: solid var(--verde);
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 4px;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+  flex: 0 0 auto;
+}
+.secao__botao[aria-expanded="true"] .secao__seta { transform: rotate(-135deg); }
+.secao__corpo {
+  padding: 8px 18px 18px;
+}
+.secao__corpo[hidden] { display: none; }
+
+/* ───────── Campos ───────── */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+.campo { display: flex; flex-direction: column; margin-top: 8px; }
+.campo--largo { grid-column: 1 / -1; }
+
+.campo label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+.campo input,
+.campo select {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  background: var(--branco);
+  color: var(--texto);
+  width: 100%;
+}
+.campo input:focus,
+.campo select:focus,
+.botao:focus,
+.secao__botao:focus {
+  outline: 3px solid var(--verde-foco);
+  outline-offset: 1px;
+}
+.campo input[aria-invalid="true"],
+.campo select[aria-invalid="true"] {
+  border-color: var(--erro);
+  background: #fff5f5;
+}
+.ajuda {
+  color: var(--cinza-texto);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+.erro-campo {
+  color: var(--erro);
+  font-size: 0.82rem;
+  margin: 4px 0 0;
+  min-height: 0;
+}
+.erro-campo:empty { display: none; }
+
+/* ───────── Botões / Ações ───────── */
+.acoes {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 0 0;
+}
+.botao {
+  font: inherit;
+  font-weight: bold;
+  padding: 12px 22px;
+  border-radius: var(--raio);
+  cursor: pointer;
+  border: 2px solid var(--verde);
+}
+.botao--primario {
+  background: var(--verde);
+  color: var(--branco);
+}
+.botao--primario:hover { background: var(--verde-claro); border-color: var(--verde-claro); }
+.botao--secundario {
+  background: var(--branco);
+  color: var(--verde);
+}
+.botao--secundario:hover { background: var(--cinza-fundo); }
+.botao[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+#form-coleta > .acoes { padding: 0 0 8px; }
+
+/* ───────── Revisão / Sucesso ───────── */
+.revisao__lista {
+  margin: 0;
+  padding: 0 18px 8px;
+}
+.revisao__grupo {
+  margin: 14px 0 6px;
+  font-weight: bold;
+  color: var(--verde);
+  border-bottom: 1px solid var(--cinza-borda);
+  padding-bottom: 4px;
+}
+.revisao__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--cinza-borda);
+  font-size: 0.92rem;
+}
+.revisao__item dt { color: var(--cinza-texto); margin: 0; }
+.revisao__item dd { margin: 0; font-weight: bold; text-align: right; }
+
+.protocolo {
+  background: var(--cinza-fundo);
+  border-radius: var(--raio);
+  padding: 12px 14px;
+  font-size: 1.05rem;
+}
+#sucesso, #revisao { padding-bottom: 18px; }
+#sucesso .acoes, #revisao .acoes { padding-left: 18px; padding-right: 18px; }
+#sucesso > p, #sucesso > .protocolo { padding: 0 18px; }
+
+/* ───────── Avisos ───────── */
+.aviso {
+  background: #fff5f5;
+  border: 1px solid var(--erro);
+  border-left: 4px solid var(--erro);
+  color: var(--erro);
+  border-radius: var(--raio);
+  padding: 14px 16px;
+  margin-top: 16px;
+  font-weight: bold;
+}
+
+.oculto { display: none !important; }
+
+/* ───────── Rodapé ───────── */
+.rodape {
+  background: var(--verde);
+  color: var(--branco);
+  text-align: center;
+  padding: 18px 16px;
+  font-size: 0.85rem;
+}
+.rodape p { margin: 0; }
+
+/* ───────── Responsivo ───────── */
+@media (max-width: 600px) {
+  .grade { grid-template-columns: 1fr; }
+  .cabecalho__titulo { font-size: 0.95rem; }
+  .cabecalho__logo img { height: 32px; }
+  .acoes { flex-direction: column; }
+  .botao { width: 100%; }
+}
