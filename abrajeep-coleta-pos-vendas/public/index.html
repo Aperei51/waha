@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Coleta de rentabilidade do pós-vendas CJDR — ABRAJEEP" />
+  <title>ABRAJEEP — Coleta de Rentabilidade do Pós-Vendas</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="cabecalho" role="banner">
+    <div class="cabecalho__interno">
+      <div class="cabecalho__logo">
+        <img src="assets/logo_abrajeep.jpg" alt="ABRAJEEP — Associação Brasileira dos Distribuidores RAM, Jeep, Dodge e Chrysler" />
+      </div>
+      <p class="cabecalho__titulo">Coleta de Rentabilidade do Pós-Vendas CJDR</p>
+    </div>
+  </header>
+
+  <main class="conteudo" id="conteudo">
+    <p class="intro">
+      Preencha os dados de rentabilidade do pós-vendas da sua loja. Os campos com
+      <span class="obrig-marca" aria-hidden="true">*</span> são obrigatórios.
+      Percentuais devem ser digitados como número inteiro (ex.: <strong>73 = 73%</strong>).
+    </p>
+
+    <!-- Acesso -->
+    <section class="cartao" aria-labelledby="acesso-titulo">
+      <h2 id="acesso-titulo" class="cartao__titulo">Acesso</h2>
+      <div class="campo">
+        <label for="codigo">Código de acesso do grupo <span class="obrig-marca">*</span></label>
+        <input type="text" id="codigo" name="codigo" autocomplete="off"
+               aria-describedby="codigo-ajuda" required />
+        <small id="codigo-ajuda" class="ajuda">Fornecido pela ABRAJEEP. Validado no envio.</small>
+        <p class="erro-campo" data-erro="codigo" role="alert"></p>
+      </div>
+    </section>
+
+    <!-- Formulário gerado dinamicamente a partir do schema em app.js -->
+    <form id="form-coleta" novalidate>
+      <div id="secoes"><!-- seções (acordeão) injetadas pelo app.js --></div>
+
+      <div class="acoes">
+        <button type="submit" class="botao botao--primario" id="btn-revisar">Revisar envio</button>
+      </div>
+    </form>
+
+    <!-- Tela de revisão -->
+    <section class="cartao oculto" id="revisao" aria-labelledby="revisao-titulo" tabindex="-1">
+      <h2 id="revisao-titulo" class="cartao__titulo">Revise antes de enviar</h2>
+      <p class="ajuda">Confira os dados abaixo. Se algo estiver errado, volte e corrija.</p>
+      <dl class="revisao__lista" id="revisao-lista"></dl>
+      <div class="acoes">
+        <button type="button" class="botao botao--secundario" id="btn-voltar">Voltar e editar</button>
+        <button type="button" class="botao botao--primario" id="btn-enviar">Confirmar e enviar</button>
+      </div>
+    </section>
+
+    <!-- Tela de sucesso -->
+    <section class="cartao oculto" id="sucesso" aria-labelledby="sucesso-titulo" tabindex="-1">
+      <h2 id="sucesso-titulo" class="cartao__titulo">Envio realizado com sucesso</h2>
+      <p>Seus dados foram registrados na planilha da ABRAJEEP.</p>
+      <p class="protocolo">Protocolo: <strong id="protocolo-valor"></strong></p>
+      <p class="ajuda" id="sucesso-detalhe"></p>
+      <div class="acoes">
+        <button type="button" class="botao botao--primario" id="btn-novo">Novo envio</button>
+      </div>
+    </section>
+
+    <!-- Mensagens globais -->
+    <div class="aviso oculto" id="aviso-erro" role="alert"></div>
+  </main>
+
+  <footer class="rodape" role="contentinfo">
+    <p>ABRAJEEP — Associação Brasileira dos Distribuidores RAM, Jeep, Dodge e Chrysler</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
