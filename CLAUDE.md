@@ -74,7 +74,7 @@ src/
     app.module.core.ts     # Root Nest module (CORE)
     manager.core.ts        # SessionManager implementation (CORE)
     engines/{webjs,noweb,gows}/   # Engine-specific session implementations
-    auth/                  # API key + basic auth (api_key header, dashboard/swagger auth)
+    auth/                  # API key + basic auth (X-Api-Key header, dashboard/swagger auth)
     config/                # Per-feature config services (engine, swagger, dashboard, webhook)
     media/                 # Media storage abstraction (LOCAL / S3 / PostgreSQL) + converters
     storage/               # Session auth/config/me/worker repos; sql + sqlite3 KV stores
@@ -181,7 +181,7 @@ commit-message validator, `no-plus-in-core`, and `no-console-log`.
 `.env.example` is the canonical, commented reference. Highlights:
 
 - `WHATSAPP_DEFAULT_ENGINE` — `WEBJS` (default) / `NOWEB` / `GOWS`.
-- `WAHA_API_KEY` — API key for the `api_key` header (`sha512:...` form supported).
+- `WAHA_API_KEY` — API key for the `X-Api-Key` header (`sha512:...` form supported).
 - `WAHA_DASHBOARD_*`, `WHATSAPP_SWAGGER_*` — enable/secure dashboard & Swagger.
 - `WAHA_MEDIA_STORAGE` — `LOCAL` / `S3` / `POSTGRESQL` (+ matching `WAHA_S3_*` /
   `WAHA_MEDIA_POSTGRESQL_URL`).
