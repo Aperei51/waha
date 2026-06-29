@@ -22,6 +22,8 @@ import { BasicAuthFunction } from '@waha/core/auth/basicAuth';
 import { WebSocketAuth } from '@waha/core/auth/WebSocketAuth';
 import { GowsEngineConfigService } from '@waha/core/config/GowsEngineConfigService';
 import { WebJSEngineConfigService } from '@waha/core/config/WebJSEngineConfigService';
+import { MeetGeekClient } from '@waha/core/integrations/meetgeek/MeetGeekClient';
+import { MeetGeekConfigService } from '@waha/core/integrations/meetgeek/MeetGeekConfigService';
 import { MediaLocalStorageModule } from '@waha/core/media/local/media.local.storage.module';
 import { MediaLocalStorageConfig } from '@waha/core/media/local/MediaLocalStorageConfig';
 import { ChannelsInfoServiceCore } from '@waha/core/services/ChannelsInfoServiceCore';
@@ -48,6 +50,7 @@ import { GroupsController } from '../api/groups.controller';
 import { HealthController } from '../api/health.controller';
 import { LabelsController } from '../api/labels.controller';
 import { MediaController } from '../api/media.controller';
+import { MeetGeekController } from '../api/meetgeek.controller';
 import { PingController } from '../api/ping.controller';
 import { PresenceController } from '../api/presence.controller';
 import { ScreenshotController } from '../api/screenshot.controller';
@@ -159,6 +162,7 @@ export const CONTROLLERS = [
   ServerDebugController,
   VersionController,
   MediaController,
+  MeetGeekController,
   ...AppsModuleExports.controllers,
 ];
 export const PROVIDERS_BASE: Provider[] = [
@@ -173,6 +177,8 @@ export const PROVIDERS_BASE: Provider[] = [
   WhatsappConfigService,
   EngineConfigService,
   WebsocketGatewayCore,
+  MeetGeekConfigService,
+  MeetGeekClient,
   MediaLocalStorageConfig,
   WebSocketAuth,
   ApiKeyStrategy,
