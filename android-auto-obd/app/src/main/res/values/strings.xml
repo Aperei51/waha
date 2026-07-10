@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OBD2 Auto</string>
+    <string name="title_connection">Conexão do adaptador OBD2</string>
+    <string name="mode_bluetooth">Bluetooth (ELM327)</string>
+    <string name="mode_wifi">Wi-Fi (ELM327)</string>
+    <string name="label_device">Dispositivo pareado</string>
+    <string name="label_host">IP do adaptador</string>
+    <string name="label_port">Porta</string>
+    <string name="action_save">Salvar configuração</string>
+    <string name="action_test">Testar conexão agora</string>
+    <string name="hint_host">192.168.0.10</string>
+    <string name="hint_port">35000</string>
+    <string name="status_idle">Configure o adaptador e abra o app no Android Auto.</string>
+</resources>
