@@ -1,0 +1,55 @@
+# Agente ABRAJEEP — ambiente completo
+#   docker compose up --build
+# Serviços: PostgreSQL + pgvector, API (Fastify) e painel (Next.js).
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: abrajeep
+      POSTGRES_PASSWORD: abrajeep
+      POSTGRES_DB: abrajeep_agent
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U abrajeep -d abrajeep_agent']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://abrajeep:abrajeep@db:5432/abrajeep_agent?schema=public
+      API_HOST: 0.0.0.0
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - '3001:3001'
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  admin:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.admin
+      args:
+        # URL da API vista pelo NAVEGADOR do administrador
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  uploads:

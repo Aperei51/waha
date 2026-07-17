@@ -1,0 +1,9 @@
+meta {
+  name: Webhook - verificacao Meta
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=troque-por-um-token-aleatorio&hub.challenge=12345
+}

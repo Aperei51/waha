@@ -1,0 +1,481 @@
+// ABRAJEEP Agent — modelo de dados
+// PostgreSQL + pgvector. Todos os modelos usam soft delete (deletedAt) e
+// isolamento por organização (organizationId) onde aplicável.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+// ----------------------------------------------------------------------------
+// Organizações e concessionárias
+// ----------------------------------------------------------------------------
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  cnpj      String?   @unique
+  status    String    @default("active") // active | suspended
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users         User[]
+  dealerships   Dealership[]
+  documents     Document[]
+  conversations Conversation[]
+  tickets       Ticket[]
+  auditLogs     AuditLog[]
+
+  @@map("organizations")
+}
+
+model Dealership {
+  id             String    @id @default(uuid())
+  organizationId String
+  name           String
+  code           String // código da concessionária na rede
+  city           String?
+  state          String?
+  status         String    @default("active")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  users        User[]
+  documents    Document[]
+  tickets      Ticket[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("dealerships")
+}
+
+// ----------------------------------------------------------------------------
+// Usuários, perfis e permissões
+// ----------------------------------------------------------------------------
+
+enum UserRole {
+  VISITOR
+  ASSOCIATE
+  DEALERSHIP
+  MANAGER
+  OPERATOR
+  ADMIN
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String?
+  // Telefone em formato E.164 (ex.: 5511999999999). Identificador principal no WhatsApp.
+  phone          String    @unique
+  email          String?   @unique
+  organizationId String?
+  dealershipId   String?
+  jobTitle       String?
+  role           UserRole  @default(VISITOR)
+  status         String    @default("active") // active | blocked | pending_verification
+  // Hash bcrypt — apenas para usuários com acesso ao painel (operator/admin)
+  passwordHash   String?
+  lastSeenAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  // LGPD
+  consentGivenAt   DateTime?
+  consentPurpose   String?
+  anonymizedAt     DateTime?
+
+  organization  Organization?  @relation(fields: [organizationId], references: [id])
+  dealership    Dealership?    @relation(fields: [dealershipId], references: [id])
+  conversations Conversation[]
+  tickets       Ticket[]       @relation("TicketRequester")
+  feedbacks     Feedback[]
+  auditLogs     AuditLog[]
+
+  @@index([organizationId])
+  @@index([dealershipId])
+  @@map("users")
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  key         String       @unique // ex.: "admin", "operator"
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  key         String           @unique // ex.: "documents:write"
+  description String?
+  createdAt   DateTime         @default(now())
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ----------------------------------------------------------------------------
+// Conversas e mensagens
+// ----------------------------------------------------------------------------
+
+enum ConversationStatus {
+  OPEN
+  AGENT_HANDLING
+  WAITING_HUMAN
+  HUMAN_HANDLING
+  RESOLVED
+  CLOSED
+}
+
+model Conversation {
+  id             String             @id @default(uuid())
+  userId         String
+  organizationId String?
+  status         ConversationStatus @default(OPEN)
+  channel        String             @default("whatsapp")
+  // Identificador de conversa no provedor de IA (previous_response_id da Responses API)
+  aiConversationId String?
+  // Resumo automático de contexto antigo (conversas longas)
+  contextSummary String?
+  assignedOperatorId String?
+  handedOffAt    DateTime?
+  resolvedAt     DateTime?
+  closedAt       DateTime?
+  lastMessageAt  DateTime           @default(now())
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  deletedAt      DateTime?
+
+  user         User           @relation(fields: [userId], references: [id])
+  organization Organization?  @relation(fields: [organizationId], references: [id])
+  messages     Message[]
+  agentActions AgentAction[]
+  feedbacks    Feedback[]
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+model Message {
+  id             String           @id @default(uuid())
+  conversationId String
+  direction      MessageDirection
+  // ID da mensagem no WhatsApp (wamid) — usado para idempotência
+  providerMessageId String?       @unique
+  type           String           @default("text") // text | audio | image | document | interactive | system
+  text           String?
+  // Transcrição de áudio, quando aplicável
+  transcription  String?
+  // Intenção detectada pelo agente
+  intent         String?
+  // Quem gerou a saída: agent | operator | system
+  authorType     String           @default("user")
+  authorId       String?
+  // Fontes documentais usadas na resposta (JSON: [{documentId, chunkId, score, version, title}])
+  sources        Json?
+  // Métricas da chamada de IA
+  inputTokens    Int?
+  outputTokens   Int?
+  estimatedCostUsd Decimal?       @db.Decimal(10, 6)
+  aiResponseId   String?
+  createdAt      DateTime         @default(now())
+  deletedAt      DateTime?
+
+  conversation Conversation        @relation(fields: [conversationId], references: [id])
+  attachments  MessageAttachment[]
+  toolCalls    ToolCall[]
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model MessageAttachment {
+  id             String   @id @default(uuid())
+  messageId      String
+  kind           String // audio | image | document
+  providerMediaId String?
+  fileName       String?
+  mimeType       String?
+  sizeBytes      Int?
+  storagePath    String?
+  sha256         String?
+  createdAt      DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id])
+
+  @@index([messageId])
+  @@map("message_attachments")
+}
+
+// ----------------------------------------------------------------------------
+// Base de conhecimento
+// ----------------------------------------------------------------------------
+
+enum DocumentAudience {
+  PUBLIC       // qualquer usuário, inclusive não identificado
+  ASSOCIATES   // associados autenticados
+  DEALERSHIP   // restrito à concessionária relacionada
+  INTERNAL     // gestores e operadores
+  ADMIN        // somente administradores
+}
+
+model KnowledgeCategory {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  documents Document[]
+
+  @@map("knowledge_categories")
+}
+
+model Document {
+  id             String           @id @default(uuid())
+  title          String
+  categoryId     String?
+  organizationId String?
+  dealershipId   String?
+  ownerArea      String? // área responsável (ex.: pós-vendas)
+  audience       DocumentAudience @default(INTERNAL)
+  status         String           @default("active") // active | archived
+  version        Int              @default(1)
+  fileName       String?
+  mimeType       String?
+  sizeBytes      Int?
+  storagePath    String?
+  sha256         String?
+  publishedAt    DateTime?
+  createdById    String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  category     KnowledgeCategory? @relation(fields: [categoryId], references: [id])
+  organization Organization?      @relation(fields: [organizationId], references: [id])
+  dealership   Dealership?        @relation(fields: [dealershipId], references: [id])
+  chunks       DocumentChunk[]
+
+  @@index([organizationId])
+  @@index([dealershipId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([audience])
+  @@map("documents")
+}
+
+model DocumentChunk {
+  id         String   @id @default(uuid())
+  documentId String
+  chunkIndex Int
+  content    String
+  tokenCount Int?
+  createdAt  DateTime @default(now())
+
+  document  Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  embedding Embedding?
+
+  @@unique([documentId, chunkIndex])
+  @@map("document_chunks")
+}
+
+model Embedding {
+  id        String                       @id @default(uuid())
+  chunkId   String                       @unique
+  model     String
+  dimensions Int
+  vector    Unsupported("vector(1536)")?
+  createdAt DateTime                     @default(now())
+
+  chunk DocumentChunk @relation(fields: [chunkId], references: [id], onDelete: Cascade)
+
+  @@map("embeddings")
+}
+
+// ----------------------------------------------------------------------------
+// Tickets (solicitações) e atendimento humano
+// ----------------------------------------------------------------------------
+
+model Ticket {
+  id             String    @id @default(uuid())
+  organizationId String?
+  dealershipId   String?
+  requesterId    String
+  subject        String
+  description    String?
+  area           String? // ex.: comissão de assistência técnica
+  status         String    @default("open") // open | in_progress | resolved | closed
+  priority       String    @default("normal")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  dealership   Dealership?   @relation(fields: [dealershipId], references: [id])
+  requester    User          @relation("TicketRequester", fields: [requesterId], references: [id])
+  events       TicketEvent[]
+
+  @@index([organizationId])
+  @@index([requesterId])
+  @@index([status])
+  @@map("tickets")
+}
+
+model TicketEvent {
+  id        String   @id @default(uuid())
+  ticketId  String
+  type      String // created | status_changed | comment | assigned
+  payload   Json?
+  actorId   String?
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_events")
+}
+
+// ----------------------------------------------------------------------------
+// Ações do agente, tool calls e auditoria
+// ----------------------------------------------------------------------------
+
+model AgentAction {
+  id             String   @id @default(uuid())
+  conversationId String
+  type           String // handoff_to_human | handoff_to_agent | summary | guardrail_block
+  detail         Json?
+  actorId        String? // operador humano, quando aplicável
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@map("agent_actions")
+}
+
+model ToolCall {
+  id          String   @id @default(uuid())
+  messageId   String?
+  name        String
+  arguments   Json
+  result      Json?
+  status      String   @default("success") // success | error | denied
+  errorMessage String?
+  durationMs  Int?
+  createdAt   DateTime @default(now())
+
+  message Message? @relation(fields: [messageId], references: [id])
+
+  @@index([name])
+  @@index([messageId])
+  @@map("tool_calls")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  organizationId String?
+  userId         String?
+  actorType      String // user | operator | admin | agent | system
+  action         String // ex.: document.upload, user.update, lgpd.export
+  resource       String?
+  resourceId     String?
+  detail         Json?
+  ip             String?
+  correlationId  String?
+  createdAt      DateTime @default(now())
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ----------------------------------------------------------------------------
+// Feedback, configurações e versionamento de prompt
+// ----------------------------------------------------------------------------
+
+model Feedback {
+  id             String   @id @default(uuid())
+  conversationId String?
+  userId         String?
+  rating         Int? // 1-5
+  comment        String?
+  createdAt      DateTime @default(now())
+
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+
+  @@map("feedback")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model PromptVersion {
+  id        String   @id @default(uuid())
+  name      String // ex.: "system"
+  version   Int
+  content   String
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([name, version])
+  @@map("prompt_versions")
+}
+
+// ----------------------------------------------------------------------------
+// Idempotência de webhooks
+// ----------------------------------------------------------------------------
+
+model WebhookEvent {
+  id          String   @id @default(uuid())
+  provider    String   @default("whatsapp")
+  externalId  String // wamid ou id do evento
+  receivedAt  DateTime @default(now())
+  processedAt DateTime?
+  status      String   @default("received") // received | processed | failed
+  attempts    Int      @default(0)
+  lastError   String?
+
+  @@unique([provider, externalId])
+  @@map("webhook_events")
+}

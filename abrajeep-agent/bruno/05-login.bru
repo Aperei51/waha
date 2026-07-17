@@ -1,0 +1,23 @@
+meta {
+  name: Admin - login
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/admin/auth/login
+  body: json
+}
+
+body:json {
+  {
+    "email": "admin@abrajeep.org.br",
+    "password": "troque-esta-senha"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setEnvVar("token", res.body.token);
+  }
+}

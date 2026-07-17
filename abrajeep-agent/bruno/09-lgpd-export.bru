@@ -1,0 +1,14 @@
+meta {
+  name: Admin - LGPD exportar dados de usuario
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/admin/lgpd/users/USER_ID_AQUI/export
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

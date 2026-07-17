@@ -1,0 +1,24 @@
+{
+  "name": "abrajeep-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agente institucional da ABRAJEEP para atendimento via WhatsApp com OpenAI",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev:api": "npm run dev --workspace @abrajeep/api",
+    "dev:admin": "npm run dev --workspace @abrajeep/admin",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:generate": "npm run generate --workspace @abrajeep/database",
+    "db:migrate": "npm run migrate:deploy --workspace @abrajeep/database",
+    "db:seed": "npm run seed --workspace @abrajeep/database",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

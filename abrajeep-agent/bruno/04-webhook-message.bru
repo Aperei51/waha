@@ -1,0 +1,41 @@
+meta {
+  name: Webhook - simular mensagem de texto
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/webhooks/whatsapp
+  body: json
+}
+
+body:json {
+  {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "WABA_ID",
+        "changes": [
+          {
+            "field": "messages",
+            "value": {
+              "messaging_product": "whatsapp",
+              "contacts": [
+                { "wa_id": "5511900000004", "profile": { "name": "Associado Exemplo" } }
+              ],
+              "messages": [
+                {
+                  "id": "wamid.demo-{{$randomInt}}",
+                  "from": "5511900000004",
+                  "timestamp": "1760000000",
+                  "type": "text",
+                  "text": { "body": "Qual é a meta atual de NPS de pós-vendas da Jeep?" }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

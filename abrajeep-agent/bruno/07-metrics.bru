@@ -1,0 +1,14 @@
+meta {
+  name: Admin - metricas
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/admin/metrics
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

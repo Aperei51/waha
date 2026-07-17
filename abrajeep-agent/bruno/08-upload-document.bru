@@ -1,0 +1,21 @@
+meta {
+  name: Admin - upload de documento
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/admin/documents
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:multipart-form {
+  title: Comunicado de teste
+  audience: ASSOCIATES
+  file: @file(./exemplo.txt)
+}

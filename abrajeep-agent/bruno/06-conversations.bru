@@ -1,0 +1,14 @@
+meta {
+  name: Admin - listar conversas
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/admin/conversations?status=WAITING_HUMAN
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
