@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Painel Auto</string>
+    <string name="instrucoes">Este aplicativo aparece na tela da central multimídia quando o celular está conectado ao Android Auto.\n\nComo o app não foi instalado pela Play Store, ative uma vez no celular:\n\n1. Abra Configurações › Android Auto (ou o app Android Auto).\n2. Role até o fim e toque 7 vezes em “Versão” para ativar o modo desenvolvedor.\n3. No menu ⋮ › Configurações do desenvolvedor, marque “Fontes desconhecidas”.\n4. Volte, toque em “Personalizar acesso rápido” (ou “Personalizar ícones”) e confira se o Painel Auto está habilitado.\n5. Conecte o celular à central (cabo ou sem fio). O ícone Painel Auto aparecerá na tela do carro.</string>
+</resources>
